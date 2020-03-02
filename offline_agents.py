@@ -23,7 +23,7 @@ class OffLineBase(Agent):
 
     def load_trajectories(self, traj_file):
         # self._trajectories = np.concatenate((self._trajectories, np.load(traj_file, allow_pickle=True)))
-        self._trajectories.append(np.load(traj_file, allow_pickle=True))
+        self._trajectories.extend(np.load(traj_file, allow_pickle=True))
 
     def evaluate_agent(self, render=False):
         if render:
