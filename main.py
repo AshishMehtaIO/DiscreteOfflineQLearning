@@ -69,5 +69,5 @@ if __name__ == '__main__':
     agent.train()
 
     print('Evaluating offline agent')
-    agent.evaluate_agent()
+    agent.evaluate_agent(render=True)
     agent.plot_ep_rewards()

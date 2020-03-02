@@ -39,7 +39,7 @@ class OffLineBase(Agent):
         for i in range(500):
             if render:
                 env = wrappers.Monitor(self._env,
-                                       "./save/offline/videos/{}_{}_DiscreteMountainCar-v0".format(self._seed, i),
+                                       "./save/offline/videos/{}_{}DiscreteMountainCar-v0".format(self._seed, i),
                                        force=True)
             else:
                 env = self._env
