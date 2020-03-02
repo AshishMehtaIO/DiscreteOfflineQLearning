@@ -1,53 +1,73 @@
 import numpy as np
 import gym
 import envs
-from offline_agents import OffLineQ
+from offline_agents import OffLineQ, OffLineQLambda
 from demonstrators import Demonstrator
 
 
-if __name__=='__main__':
-    d1 = Demonstrator(num_episodes=5000, seed=2)
-    a1 = OffLineQ()
+def make_demonstrators(seeds):
+    demonstrators = []
+    for seed in seeds:
+        seed = int(seed)
+        demonstrators.append(Demonstrator(num_episodes=10000, seed=seed))
 
-    seed = 0
-    iteration = 10000
+    return demonstrators
 
-    # print('Training offline agent')
-    # d1.train()
-    # d1.plot_ep_rewards()
-    # print('Generating videos')
-    # d1.viz_policy()
 
-    # print('Loading Demonstrator Policy')
-    # d1.load_saved_policy('./save/demos/policy/{}_{}_policy.npy'.format(seed, iteration),
-    #                      './save/demos/policy/{}_{}_q.npy'.format(seed, iteration))
-    # print('Rolling out trajectories')
-    # d1.rollout_trajectories(10000)
-    # d1.save_trajectories('./save/trajectories/{}_{}_traj.npy'.format(seed, iteration))
+def train_demonstrators(demos):
+    print('Training demonstrators')
+    for d in demos:
+        d.train()
+        d.plot_ep_rewards()
+
+    print('Generating videos')
+    for d in demos:
+        d.viz_policy()
+
+
+def load_demonstrator_policy(demos, seeds, iteration):
+    print('Loading Demonstrator Policy')
+    for d, seed in zip(demos, seeds):
+        seed = int(seed)
+        d.load_saved_policy('./save/demos/policy/{}_{}_policy.npy'.format(seed, iteration),
+                            './save/demos/policy/{}_{}_q.npy'.format(seed, iteration))
+
+
+def rollout_demo_trajectories(demos, seeds, iteration, n):
+    num_tr = int(n / len(demos))
+    print('Rolling out trajectories')
+    for d, seed in zip(demos, seeds):
+        seed = int(seed)
+        d.rollout_trajectories(num_tr)
+        d.save_trajectories('./save/trajectories/{}_{}_traj.npy'.format(seed, iteration))
+
+def viz_demo_policy(demos):
+    print('Rendering demo videos')
+    for d in demos:
+        d.viz_policy(trajectories=True)
+
+
+if __name__ == '__main__':
+    num_demos = 16
+    iteration = 300
+
+    seeds = np.arange(16, dtype=int)
+
+    # demonstrators = make_demonstrators(seeds)
+    # train_demonstrators(demonstrators)
+    # load_demonstrator_policy(demonstrators, seeds, iteration)
+    # rollout_demo_trajectories(demonstrators, seeds, iteration, 10000)
+    # viz_demo_policy(demonstrators)
+
+    agent = OffLineQ()
 
     print('Training offline agent')
-    a1.load_trajectories('./save/trajectories/{}_{}_traj.npy'.format(seed, iteration))
-    a1._Q = a1._Q * -10000
-    a1.train()
+    for seed in seeds:
+        seed = int(seed)
+        agent.load_trajectories('./save/trajectories/{}_{}_traj.npy'.format(seed, iteration))
+    # agent._Q = agent._Q * -10000
+    agent.train()
+
     print('Evaluating offline agent')
-    a1.evaluate_agent()
-    a1.plot_ep_rewards()
-
-
-    # demonstrators = []
-    # for seed in range(16):
-    #     demonstrators.append(Demonstrator(num_episodes=10000, seed=seed))
-    #
-    # for d in demonstrators:
-    #     d.train()
-    #     d.plot_ep_rewards()
-    #     print('Generating videos')
-    #     d.viz_policy()
-    #
-    # # print('Loading Demonstrator Policy')
-    # # d1.load_saved_policy('./save/demos/policy/2_5000_policy.npy', './save/demos/policy/2_5000_q.npy')
-    # # print('Rolling out trajectories')
-    # traj = []
-    # for d in demonstrators:
-    #     traj.extend(d.rollout_trajectories(1000))
-
+    agent.evaluate_agent()
+    agent.plot_ep_rewards()

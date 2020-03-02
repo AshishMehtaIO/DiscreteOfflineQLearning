@@ -1,4 +1,4 @@
-from base_agents import Agent, QLearning
+from base_agents import Agent, QLearning, QLambda
 import gym
 import os
 from gym import wrappers
@@ -19,10 +19,11 @@ class OffLineBase(Agent):
         super(OffLineBase, self).__init__(env=env, seed=seed, gamma=gamma, lr=lr, eps=eps)
         self._reward_list = []
         self._policy = None
-        self._trajectories = np.array([])
+        self._trajectories = []
 
     def load_trajectories(self, traj_file):
-        self._trajectories = np.concatenate((self._trajectories, np.load(traj_file, allow_pickle=True)))
+        # self._trajectories = np.concatenate((self._trajectories, np.load(traj_file, allow_pickle=True)))
+        self._trajectories.append(np.load(traj_file, allow_pickle=True))
 
     def evaluate_agent(self, render=False):
         if render:
@@ -67,17 +68,35 @@ class OffLineBase(Agent):
 
 
 class OffLineQ(OffLineBase, QLearning):
-    def __init__(self):
-        super(OffLineBase, self).__init__(env=gym.make('DiscreteMountainCar-v0'),
-                                          seed=100,
-                                          gamma=0.99,
-                                          lr=0.1,
-                                          eps=1.0)
+    def __init__(self, env=gym.make('DiscreteMountainCar-v0'),
+                 seed=100,
+                 gamma=0.99,
+                 lr=0.1,
+                 eps=1.0):
+        super(OffLineQ, self).__init__(env=env, seed=seed, gamma=gamma, lr=lr, eps=eps)
 
     def train(self):
-        assert self._trajectories.shape[0] is not 0
+        assert len(self._trajectories) is not 0
         for episode in self._trajectories:
             for transition in episode:
                 (s, a, s_, r, d) = transition
                 self.qlearning_update(s, a, s_, r, d)
 
+
+class OffLineQLambda(OffLineBase, QLambda):
+    def __init__(self, env=gym.make('DiscreteMountainCar-v0'),
+                 seed=100,
+                 gamma=0.99,
+                 lr=0.1,
+                 eps=1.0,
+                 lmbd=0.8):
+        super(OffLineQLambda, self).__init__(env=env, seed=seed, gamma=gamma, lr=lr, eps=eps, lmbd=lmbd)
+
+    def train(self):
+        assert len(self._trajectories) is not 0
+        for episode in self._trajectories:
+            for idx, transition in enumerate(episode):
+                if idx:
+                    (s, a, s_, r, d) = episode[idx-1]
+                    (_, a_, _, _, _) = transition
+                    self.qlamba_update(s, a, s_, a_, r, d)

@@ -76,11 +76,11 @@ class Demonstrator(QLearning):
         for i in range(5):
             if not trajectories:
                 env = wrappers.Monitor(self._env,
-                                   "./save/demos/videos/{}_{}_DiscreteMountainCar-v0".format(self._seed, i),
+                                   "./save/demos/videos/{}_{}DiscreteMountainCar-v0".format(self._seed, i),
                                    force=True)
             else:
                 env = wrappers.Monitor(self._env,
-                                       "./save/trajectories/videos/{}_{}_DiscreteMountainCar-v0".format(self._seed, i),
+                                       "./save/trajectories/videos/{}_{}DiscreteMountainCar-v0".format(self._seed, i),
                                        force=True)
 
             s = env.reset()
