@@ -45,13 +45,20 @@ class QLearning(Agent):
 
 
 class QLambda(Agent):
-    def __init__(self, env, seed, gamma, lr, eps):
+    def __init__(self, env, seed, gamma, lr, eps, lmbd):
         super(QLambda, self).__init__(env, seed, gamma, lr, eps)
         self._e = np.zeros_like(self._Q)
+        self._lmbd = lmbd
 
-    def qlamba_update(self, s, a, s_, r, d):
-        a_ = self.get_max_action(s_)
-        delta = r + (1 - d) * self._gamma * self._Q[s_, a_]
+    def qlamba_update(self, s, a, s_, a_, r, d):
+        a_max = self.get_max_action(s_)
+        delta = r + (1 - d) * self._gamma * self._Q[s_, a_max] - self._Q[s, a]
         self._e[s, a] = 1
 
-        for 
+        for state in self._statespace:
+            for action in self._actionspace:
+                self._Q[state, action] = self._Q[state, action] + self._lr * self._lmbd * self._e[state, action] * delta
+                if a_max == a_:
+                    self._e[state, action] = self._gamma * self._lmbd * self._e[state, action]
+                else:
+                    self._e[state, action] = 0
