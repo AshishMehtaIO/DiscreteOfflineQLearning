@@ -1,4 +1,4 @@
-from base_agents import Agent
+from base_agents import Agent, QLearning
 import gym
 import os
 from gym import wrappers
@@ -9,27 +9,20 @@ import envs
 import numpy as np
 
 
-class OffLineQ(Agent):
+class OffLineBase(Agent):
     def __init__(self,
                  env=gym.make('DiscreteMountainCar-v0'),
                  seed=100,
                  gamma=0.99,
                  lr=0.1,
                  eps=1.0):
-        super(OffLineQ, self).__init__(env=env, seed=seed, gamma=gamma, lr=lr, eps=eps)
+        super(OffLineBase, self).__init__(env=env, seed=seed, gamma=gamma, lr=lr, eps=eps)
         self._reward_list = []
         self._policy = None
         self._trajectories = np.array([])
 
     def load_trajectories(self, traj_file):
         self._trajectories = np.concatenate((self._trajectories, np.load(traj_file, allow_pickle=True)))
-
-    def train(self):
-        assert self._trajectories.shape[0] is not 0
-        for episode in self._trajectories:
-            for transition in episode:
-                (s, a, s_, r, d) = transition
-                self.qlearning_update(s, a, s_, r, d)
 
     def evaluate_agent(self, render=False):
         if render:
@@ -45,8 +38,8 @@ class OffLineQ(Agent):
         for i in range(500):
             if render:
                 env = wrappers.Monitor(self._env,
-                                   "./save/offline/videos/{}_{}_DiscreteMountainCar-v0".format(self._seed, i),
-                                   force=True)
+                                       "./save/offline/videos/{}_{}_DiscreteMountainCar-v0".format(self._seed, i),
+                                       force=True)
             else:
                 env = self._env
 
@@ -71,3 +64,20 @@ class OffLineQ(Agent):
         plt.xlabel('Episodes')
         plt.ylabel('Total rewards')
         plt.show()
+
+
+class OffLineQ(OffLineBase, QLearning):
+    def __init__(self):
+        super(OffLineBase, self).__init__(env=gym.make('DiscreteMountainCar-v0'),
+                                          seed=100,
+                                          gamma=0.99,
+                                          lr=0.1,
+                                          eps=1.0)
+
+    def train(self):
+        assert self._trajectories.shape[0] is not 0
+        for episode in self._trajectories:
+            for transition in episode:
+                (s, a, s_, r, d) = transition
+                self.qlearning_update(s, a, s_, r, d)
+
