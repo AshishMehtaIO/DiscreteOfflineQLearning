@@ -1,4 +1,4 @@
-from base_agent import Agent
+from base_agents import Agent
 import gym
 import os
 from gym import wrappers

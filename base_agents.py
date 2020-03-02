@@ -20,10 +20,6 @@ class Agent:
         self._Q = np.random.random((self._statedim, self._actiondim))
         # TODO terminal state = 0
 
-    def qlearning_update(self, s, a, s_, r, d):
-        a_ = self.get_max_action(s_)
-        self._Q[s, a] = self._Q[s, a] + self._lr * (r + (1-d)*self._gamma * self._Q[s_, a_] - self._Q[s, a])
-
     def get_max_action(self, s):
         return np.argmax(self._Q[s, :])
 
@@ -37,3 +33,25 @@ class Agent:
 
     def get_greedy_policy(self):
         return np.argmax(self._Q, axis=1)
+
+
+class QLearning(Agent):
+    def __init__(self, env, seed, gamma, lr, eps):
+        super(QLearning, self).__init__(env, seed, gamma, lr, eps)
+
+    def qlearning_update(self, s, a, s_, r, d):
+        a_ = self.get_max_action(s_)
+        self._Q[s, a] = self._Q[s, a] + self._lr * (r + (1 - d) * self._gamma * self._Q[s_, a_] - self._Q[s, a])
+
+
+class QLambda(Agent):
+    def __init__(self, env, seed, gamma, lr, eps):
+        super(QLambda, self).__init__(env, seed, gamma, lr, eps)
+        self._e = np.zeros_like(self._Q)
+
+    def qlamba_update(self, s, a, s_, r, d):
+        a_ = self.get_max_action(s_)
+        delta = r + (1 - d) * self._gamma * self._Q[s_, a_]
+        self._e[s, a] = 1
+
+        for 

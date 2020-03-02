@@ -3,13 +3,13 @@ import gym
 import envs
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-from base_agent import Agent
+from base_agents import QLearning
 from pyvirtualdisplay import Display
 from gym import wrappers
 import os
 
 
-class Demonstrator(Agent):
+class Demonstrator(QLearning):
     def __init__(self,
                  env=gym.make('DiscreteMountainCar-v0'),
                  seed=1,

@@ -2,12 +2,15 @@ import numpy as np
 import gym
 import envs
 from offline_agents import OffLineQ
-from train_demonstrator import Demonstrator
+from demonstrators import Demonstrator
 
 
 if __name__=='__main__':
     d1 = Demonstrator(num_episodes=5000, seed=2)
     a1 = OffLineQ()
+
+    seed = 0
+    iteration = 10000
 
     # print('Training offline agent')
     # d1.train()
@@ -16,13 +19,15 @@ if __name__=='__main__':
     # d1.viz_policy()
 
     # print('Loading Demonstrator Policy')
-    # d1.load_saved_policy('./save/demos/policy/0_10000_policy.npy', './save/demos/policy/0_10000_q.npy')
+    # d1.load_saved_policy('./save/demos/policy/{}_{}_policy.npy'.format(seed, iteration),
+    #                      './save/demos/policy/{}_{}_q.npy'.format(seed, iteration))
     # print('Rolling out trajectories')
     # d1.rollout_trajectories(10000)
-    # d1.save_trajectories('./save/trajectories/0_10000_traj.npy')
+    # d1.save_trajectories('./save/trajectories/{}_{}_traj.npy'.format(seed, iteration))
 
     print('Training offline agent')
-    a1.load_trajectories('./save/trajectories/0_10000_traj.npy')
+    a1.load_trajectories('./save/trajectories/{}_{}_traj.npy'.format(seed, iteration))
+    a1._Q = a1._Q * -10000
     a1.train()
     print('Evaluating offline agent')
     a1.evaluate_agent()
