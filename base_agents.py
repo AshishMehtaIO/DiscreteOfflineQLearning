@@ -24,7 +24,6 @@ class Agent:
         return np.argmax(self._Q[s, :])
 
     def select_epgreedy_policy(self, s):
-        np.random.seed(self._seed)
         if np.random.random() < self._eps:
             action = np.random.choice(self._actionspace)
         else:

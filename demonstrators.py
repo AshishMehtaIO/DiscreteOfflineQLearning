@@ -14,7 +14,7 @@ class Demonstrator(QLearning):
                  env=gym.make('DiscreteMountainCar-v0'),
                  seed=1,
                  gamma=0.99,
-                 lr=0.1,
+                 lr=0.01,
                  eps=1.0,
                  num_episodes=50000,
                  policy_save_frequency=10):
@@ -35,9 +35,11 @@ class Demonstrator(QLearning):
             s = self._env.reset()
             done = False
 
-            if episode % self._policy_save_frequency == 0:
-                self.save_greedy_policy('./save/demos/policy/{}_{}_policy'.format(self._seed, episode),
-                                        './save/demos/policy/{}_{}_q'.format(self._seed, episode))
+            # if episode % self._policy_save_frequency == 0:
+            #     self.save_greedy_policy('./save/demos/policy/{}_{}_policy'.format(self._seed, episode),
+            #                             './save/demos/policy/{}_{}_q'.format(self._seed, episode))
+            # TODO uncomment
+
             while not done:
                 action = self.select_epgreedy_policy(s)
                 s_, r, done, _ = self._env.step(action)
@@ -117,6 +119,26 @@ class Demonstrator(QLearning):
     def save_trajectories(self, traj_file):
         assert self._trajectories is not None
         np.save(traj_file, self._trajectories)
+
+    def get_mc_qvalue(self, state, action):
+        self._policy = self.get_greedy_policy()
+        returns = []
+        for i in range(50000):
+            ep_rewards = []
+            # s = self._env.reset_to(state)
+            s = self._env.reset()
+            s, r, d, _ = self._env.step(action)
+            ep_rewards.append(r)
+            while not d:
+                a = self._policy[s]
+                s_, r, d, _ = self._env.step(a[0])
+                ep_rewards.append(r)
+                s = s_
+            discounts = np.logspace(0, len(ep_rewards), num=len(ep_rewards), base=self._gamma, endpoint=False)
+            ep_return = np.sum(np.multiply(np.array(ep_rewards), discounts))
+            returns.append(ep_return)
+
+        return np.average(returns)
 
 
 if __name__ == '__main__':

@@ -20,9 +20,9 @@ def train_demonstrators(demos):
         d.train()
         d.plot_ep_rewards()
 
-    print('Generating videos')
-    for d in demos:
-        d.viz_policy()
+    # print('Generating videos')
+    # for d in demos:
+    #     d.viz_policy()
 
 
 def load_demonstrator_policy(demos, seeds, iteration):
