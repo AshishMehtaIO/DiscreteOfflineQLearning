@@ -34,5 +34,5 @@ class DiscreteMountainCarEnv(mountain_car.MountainCarEnv):
 if __name__=='__main__':
     import envs
     env = gym.make('DiscreteMountainCar-v0')
-    env.reset()
-    print(env.step(env.action_space.sample()))
+    for i in range(100):
+        print(env.reset())

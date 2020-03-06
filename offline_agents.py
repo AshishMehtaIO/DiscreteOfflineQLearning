@@ -27,9 +27,6 @@ class OffLineBase(Agent):
 
     def evaluate_agent(self, render=False):
         if render:
-            if not os.path.exists('./save/offline/videos'):
-                os.makedirs('./save/offline/videos')
-
             virtual_display = Display(visible=0, size=(1400, 900))
             virtual_display.start()
 
@@ -37,13 +34,13 @@ class OffLineBase(Agent):
 
         self._reward_list = []
         for i in range(500):
-            if render:
-                env = wrappers.Monitor(self._env,
-                                       "./save/offline/videos/{}_{}DiscreteMountainCar-v0".format(self._seed, i),
-                                       force=True)
-            else:
-                env = self._env
+            env = self._env
 
+            if render:
+                if i <= 5:
+                    env = wrappers.Monitor(self._env,
+                                           "./save/offline/videos/{}_{}DiscreteMountainCar-v0".format(self._seed, i),
+                                           force=True)
             s = env.reset()
             if render:
                 env.render()

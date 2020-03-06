@@ -27,18 +27,14 @@ class Demonstrator(QLearning):
         self._policy_save_frequency = policy_save_frequency
 
     def train(self):
-        if not os.path.exists('./save/demos/policy'):
-            os.makedirs('./save/demos/policy')
-
         for episode in tqdm(range(self._num_episodes+1)):
             total_reward = 0
             s = self._env.reset()
             done = False
 
-            # if episode % self._policy_save_frequency == 0:
-            #     self.save_greedy_policy('./save/demos/policy/{}_{}_policy'.format(self._seed, episode),
-            #                             './save/demos/policy/{}_{}_q'.format(self._seed, episode))
-            # TODO uncomment
+            if episode % self._policy_save_frequency == 0:
+                self.save_greedy_policy('./save/demos/policy/{}_{}_policy'.format(self._seed, episode),
+                                        './save/demos/policy/{}_{}_q'.format(self._seed, episode))
 
             while not done:
                 action = self.select_epgreedy_policy(s)
@@ -64,13 +60,6 @@ class Demonstrator(QLearning):
         np.save(q_file, self._Q)
 
     def viz_policy(self, trajectories=False):
-
-        if not os.path.exists('./save/demos/videos'):
-            os.makedirs('./save/demos/videos')
-
-        if not os.path.exists('./save/trajectories/videos'):
-            os.makedirs('./save/trajectories/videos')
-
         virtual_display = Display(visible=0, size=(1400, 900))
         virtual_display.start()
         self._policy = self.get_greedy_policy()

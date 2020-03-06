@@ -3,6 +3,7 @@ import gym
 import envs
 from offline_agents import OffLineQ, OffLineQLambda
 from demonstrators import Demonstrator
+import os
 
 
 def make_demonstrators(seeds):
@@ -20,9 +21,11 @@ def train_demonstrators(demos):
         d.train()
         d.plot_ep_rewards()
 
-    # print('Generating videos')
-    # for d in demos:
-    #     d.viz_policy()
+
+def generate_videos(demos):
+    print('Generating videos')
+    for d in demos:
+        d.viz_policy()
 
 
 def load_demonstrator_policy(demos, seeds, iteration):
@@ -48,15 +51,25 @@ def viz_demo_policy(demos):
 
 
 if __name__ == '__main__':
-    num_demos = 16
+    num_demos = 32
     iteration = 300
 
-    seeds = np.arange(16, dtype=int)
+    seeds = np.arange(num_demos, dtype=int)
 
-    # demonstrators = make_demonstrators(seeds)
+    if not os.path.exists('./save/offline/videos'):
+        os.makedirs('./save/offline/videos')
+    if not os.path.exists('./save/demos/policy'):
+        os.makedirs('./save/demos/policy')
+    if not os.path.exists('./save/demos/videos'):
+        os.makedirs('./save/demos/videos')
+    if not os.path.exists('./save/trajectories/videos'):
+        os.makedirs('./save/trajectories/videos')
+
+    demonstrators = make_demonstrators(seeds)
     # train_demonstrators(demonstrators)
-    # load_demonstrator_policy(demonstrators, seeds, iteration)
-    # rollout_demo_trajectories(demonstrators, seeds, iteration, 10000)
+    # generate_videos(demonstrators)
+    load_demonstrator_policy(demonstrators, seeds, iteration)
+    rollout_demo_trajectories(demonstrators, seeds, iteration, 100000)
     # viz_demo_policy(demonstrators)
 
     agent = OffLineQ()
@@ -65,9 +78,9 @@ if __name__ == '__main__':
     for seed in seeds:
         seed = int(seed)
         agent.load_trajectories('./save/trajectories/{}_{}_traj.npy'.format(seed, iteration))
-    # agent._Q = agent._Q * -10000
+    agent._Q = agent._Q * -10000
     agent.train()
 
     print('Evaluating offline agent')
-    agent.evaluate_agent(render=True)
+    agent.evaluate_agent(render=False)
     agent.plot_ep_rewards()
