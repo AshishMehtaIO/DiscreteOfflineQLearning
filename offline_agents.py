@@ -15,8 +15,9 @@ class OffLineBase(Agent):
                  seed=100,
                  gamma=0.99,
                  lr=0.1,
-                 eps=1.0):
-        super(OffLineBase, self).__init__(env=env, seed=seed, gamma=gamma, lr=lr, eps=eps)
+                 eps=1.0,
+                 lmbd=0.0):
+        super(OffLineBase, self).__init__(env=env, seed=seed, gamma=gamma, lr=lr, eps=eps, lmbd=lmbd)
         self._reward_list = []
         self._policy = None
         self._trajectories = []
@@ -33,7 +34,7 @@ class OffLineBase(Agent):
         self._policy = self.get_greedy_policy()
 
         self._reward_list = []
-        for i in range(500):
+        for i in range(100):
             env = self._env
 
             if render:
@@ -63,18 +64,30 @@ class OffLineBase(Agent):
         plt.ylabel('Total rewards')
         plt.show()
 
+    def check_trajectories_coverage(self):
+        assert len(self._trajectories) is not 0
+        count_table = np.zeros_like(self._Q, dtype=np.int)
+        for episode in tqdm(self._trajectories):
+            for transition in episode:
+                (s, a, _, _, _) = transition
+                count_table[s, a] += 1
+        print('Min count: ', np.min(count_table), 'Max count: ', np.max(count_table))
+        return count_table
+
+
 
 class OffLineQ(OffLineBase, QLearning):
     def __init__(self, env=gym.make('DiscreteMountainCar-v0'),
                  seed=100,
                  gamma=0.99,
                  lr=0.1,
-                 eps=1.0):
-        super(OffLineQ, self).__init__(env=env, seed=seed, gamma=gamma, lr=lr, eps=eps)
+                 eps=1.0,
+                 lmbd=0.0):
+        super(OffLineQ, self).__init__(env=env, seed=seed, gamma=gamma, lr=lr, eps=eps, lmbd=lmbd)
 
     def train(self):
         assert len(self._trajectories) is not 0
-        for episode in self._trajectories:
+        for episode in tqdm(self._trajectories):
             for transition in episode:
                 (s, a, s_, r, d) = transition
                 self.qlearning_update(s, a, s_, r, d)
@@ -91,7 +104,7 @@ class OffLineQLambda(OffLineBase, QLambda):
 
     def train(self):
         assert len(self._trajectories) is not 0
-        for episode in self._trajectories:
+        for episode in tqdm(self._trajectories):
             for idx, transition in enumerate(episode):
                 if idx:
                     (s, a, s_, r, d) = episode[idx-1]

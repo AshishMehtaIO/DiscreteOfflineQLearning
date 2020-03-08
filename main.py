@@ -44,10 +44,10 @@ def rollout_demo_trajectories(demos, seeds, iteration, n):
         d.rollout_trajectories(num_tr)
         d.save_trajectories('./save/trajectories/{}_{}_traj.npy'.format(seed, iteration))
 
-def viz_demo_policy(demos):
+def viz_demo_policy(demos, iteration):
     print('Rendering demo videos')
     for d in demos:
-        d.viz_policy(trajectories=True)
+        d.viz_policy(trajectories=True, iteration=iteration)
 
 
 if __name__ == '__main__':
@@ -65,22 +65,31 @@ if __name__ == '__main__':
     if not os.path.exists('./save/trajectories/videos'):
         os.makedirs('./save/trajectories/videos')
 
-    demonstrators = make_demonstrators(seeds)
+    # demonstrators = make_demonstrators(seeds)
     # train_demonstrators(demonstrators)
     # generate_videos(demonstrators)
-    load_demonstrator_policy(demonstrators, seeds, iteration)
-    rollout_demo_trajectories(demonstrators, seeds, iteration, 100000)
-    # viz_demo_policy(demonstrators)
+    # load_demonstrator_policy(demonstrators, seeds, iteration)
+    # rollout_demo_trajectories(demonstrators, seeds, iteration, 100000)
+    # viz_demo_policy(demonstrators, iteration)
 
+    # Offline learning
     agent = OffLineQ()
 
-    print('Training offline agent')
+    print('Loading trajectories')
     for seed in seeds:
         seed = int(seed)
         agent.load_trajectories('./save/trajectories/{}_{}_traj.npy'.format(seed, iteration))
-    agent._Q = agent._Q * -10000
+
+    # Init Q values
+    agent._Q = np.full_like(agent._Q, -10000.0)
+
+    # print('Checking coverage')
+    # counts = agent.check_trajectories_coverage()
+
+    print('Training offline agent')
     agent.train()
 
     print('Evaluating offline agent')
-    agent.evaluate_agent(render=False)
+    agent.evaluate_agent(render=True)
+    print('Min Q Val, ', np.min(agent._Q))
     agent.plot_ep_rewards()

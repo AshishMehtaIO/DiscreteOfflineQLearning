@@ -59,7 +59,7 @@ class Demonstrator(QLearning):
         np.save(policy_file, self._policy)
         np.save(q_file, self._Q)
 
-    def viz_policy(self, trajectories=False):
+    def viz_policy(self, iteration=300, trajectories=False):
         virtual_display = Display(visible=0, size=(1400, 900))
         virtual_display.start()
         self._policy = self.get_greedy_policy()
@@ -71,8 +71,8 @@ class Demonstrator(QLearning):
                                    force=True)
             else:
                 env = wrappers.Monitor(self._env,
-                                       "./save/trajectories/videos/{}_{}DiscreteMountainCar-v0".format(self._seed, i),
-                                       force=True)
+                                       "./save/trajectories/videos/{}_{}_{}DiscreteMountainCar-v0".format(
+                                           self._seed, iteration, i), force=True)
 
             s = env.reset()
             env.render()
